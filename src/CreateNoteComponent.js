@@ -1,5 +1,6 @@
 import React,{useState} from 'react';
 import { StyleSheet, TextInput, View, Button } from 'react-native';
+import firebase from 'firebase';
 
 const CreateNoteComponent = (props) => {
     const [newNoteText, setNewNoteText] = useState('')
@@ -12,19 +13,25 @@ const CreateNoteComponent = (props) => {
         multiline={true}
         value={newNoteText}
         onChangeText={(currentText) => {
-            if(currentText.length > 10){
-                console.log("Not allows");
-            } else {
                 setNewNoteText(currentText)
-            }
         }
     }
         />
         <Button title={'Create Note'}
-    onPress={() => {
-        props.onCreateButtonPress(newNoteText)
+        
+        onPress={() => {
+            if(newNoteText !== ''){
         setNewNoteText('')
+
+        loggedInUserId = firebase.auth().currentUser.uid
+        pathForData = `/users/${loggedInUserId}/`
+
+        firebase.database().ref(pathForData).push({
+            'date': new Date().toDateString(),
+            'text': newNoteText 
+        })
             }}
+        }
         />
     </View>
 }

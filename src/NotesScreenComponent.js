@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import {Text, FlatList, View, StyleSheet, TextInput} from 'react-native';
+import React, { useState,useEffect } from 'react';
+import {Text, FlatList, View, StyleSheet, TextInput, Button} from 'react-native';
 import SingleNoteSummaryComponent from './SingleNoteSummaryComponent';
 import CreateNoteComponent from './CreateNoteComponent';
+import firebase from 'firebase';
+import _ from 'lodash';
 
 const NotesScreenComponent = () =>{
     // var data = [
@@ -14,7 +16,23 @@ const NotesScreenComponent = () =>{
     //     {"date":"24-10-1993","text":"Text7"}
     // ]
 
+
     const [data, setData] = useState([]);
+
+
+    const loggedInUserId = firebase.auth().currentUser.uid 
+    useEffect(() => firebase.database().ref(`/users/${loggedInUserId}/`).on('value', (completeNewData) => {
+        
+
+        const newDataList = _.map(completeNewData.val(), (value,key) => {
+            return {...value}
+        })
+        console.log(newDataList)
+        setData(newDataList.reverse())
+    } ),[]
+    )
+
+
 
     const addNewNote = (text) => {
         if(text.length > 0) {
@@ -25,6 +43,10 @@ const NotesScreenComponent = () =>{
     // {name: 'abc', 'age': 12} -> {name} -> {name: 'abc'}
     // item , index
     return <View style={styles.viewProperties}>
+        <Button 
+            title={"Log Out"}
+            onPress={() => firebase.auth().signOut()}
+        />
         <CreateNoteComponent onCreateButtonPress={
             (text) =>addNewNote(text)
         } />
